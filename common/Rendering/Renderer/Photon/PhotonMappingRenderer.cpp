@@ -13,6 +13,8 @@
 
 #define VISUALIZE_PHOTON_MAPPING 1
 
+static const float EPSILON = 0.001f;
+
 PhotonMappingRenderer::PhotonMappingRenderer(std::shared_ptr<class Scene> scene, std::shared_ptr<class ColorSampler> sampler):
     BackwardRenderer(scene, sampler), 
     diffusePhotonNumber(1000000),
@@ -74,6 +76,76 @@ void PhotonMappingRenderer::TracePhoton(PhotonKdtree& photonMap, Ray* photonRay,
     assert(photonRay);
     IntersectionState state(0, 0);
     state.currentIOR = currentIOR;
+
+	// done with photon
+	if (remainingBounces < 0 || !storedScene->Trace(photonRay, &state)) {
+		return;
+	}
+
+	// create photon that doesn't come directly from light
+	if (path.size() > 1) {
+		Photon newPhoton;
+		newPhoton.position = state.intersectionRay.GetRayPosition(state.intersectionT) - EPSILON * photonRay->GetRayDirection();
+		newPhoton.intensity = lightIntensity;
+		newPhoton.toLightRay.SetRayDirection(-1.0f * photonRay->GetRayDirection());
+		photonMap.insert(newPhoton);
+	}
+
+	const MeshObject *hitMeshObject = state.intersectedPrimitive->GetParentMeshObject();
+	const Material *hitMaterial = hitMeshObject->GetMaterial();
+	const glm::vec3 diffuse = hitMaterial->GetBaseDiffuseReflection();
+
+	float r = diffuse[0];
+	float g = diffuse[1];
+	float b = diffuse[2];
+
+	float m = (r < g) ? g : r;
+	float p = (m < b) ? b : m;
+
+	float gen = 1.0 * rand() / RAND_MAX;
+
+	// absorb photon
+	if (gen > p) {
+		return;
+	}
+
+	// scatter photon
+	// sampling
+	float u1 = 1.0 * rand() / RAND_MAX;
+	float u2 = 1.0 * rand() / RAND_MAX;
+
+	float rad = sqrt(u1);
+	float theta = 2 * PI * u2;
+
+	float x = rad * cos(theta);
+	float y = rad * sin(theta);
+	float z = sqrt(1 - u1);
+
+	glm::vec3 ray = normalize(glm::vec3(x, y, z));
+	
+	// transformation
+	// std::cout << "transform" << std::endl;
+	glm::vec3 nv = state.ComputeNormal();
+	glm::vec3 tv;
+	if (abs(dot(nv, glm::vec3(1, 0, 0))) < 0.99) {
+		tv = normalize(cross(nv, glm::vec3(1, 0, 0)));
+	}
+	else {
+		tv = normalize(cross(nv, glm::vec3(0, 1, 0)));
+	}
+	glm::vec3 bv = normalize(cross(nv, tv));
+	glm::vec3 transformedRay = glm::mat3(tv, bv, nv) * ray;
+
+	// std::cout << nv[0] << ", " << nv[1] << ", " << nv[2] << std::endl;
+	// std::cout << tv[0] << ", " << tv[1] << ", " << tv[2] << std::endl;
+	// std::cout << bv[0] << ", " << bv[1] << ", " << bv[2] << std::endl;
+
+	// recurse
+	path.push_back('S');
+	remainingBounces -= 1;
+	photonRay->SetRayDirection(transformedRay);
+	photonRay->SetRayPosition(state.intersectionRay.GetRayPosition(state.intersectionT) + EPSILON * photonRay->GetRayDirection());
+	TracePhoton(photonMap, photonRay, lightIntensity, path, currentIOR, remainingBounces);
 }
 
 glm::vec3 PhotonMappingRenderer::ComputeSampleColor(const struct IntersectionState& intersection, const class Ray& fromCameraRay) const
