@@ -58,17 +58,17 @@ std::shared_ptr<Scene> Assignment7::CreateScene() const
     }
 
 	std::vector<std::shared_ptr<aiMaterial>> loadedMaterials2;
-	std::vector<std::shared_ptr<MeshObject>> fishObjects = MeshLoader::LoadMesh("color_fish/color_fish.obj", &loadedMaterials2);
+	std::vector<std::shared_ptr<MeshObject>> fishObjects = MeshLoader::LoadMesh("Room/Room.obj", &loadedMaterials2);
 	for (size_t i = 0; i < fishObjects.size(); ++i) {
 		std::shared_ptr<Material> materialCopy = cubeMaterial->Clone();
 		materialCopy->LoadMaterialFromAssimp(loadedMaterials2[i]);
-		materialCopy->SetTexture("diffuseTexture", TextureLoader::LoadTexture("color_fish/Golden_Fish_Box01Shape_color.jpg"));
-		materialCopy->SetTexture("specularTexture", TextureLoader::LoadTexture("color_fish/Golden_Fish_Box01Shape_color.jpg"));
+		materialCopy->SetTexture("diffuseTexture", TextureLoader::LoadTexture("Room/wallpaper.jpg"));
+		materialCopy->SetTexture("specularTexture", TextureLoader::LoadTexture("Room/wallpaper.jpg"));
 		fishObjects[i]->SetMaterial(materialCopy);
 
 		std::shared_ptr<SceneObject> fishSceneObject = std::make_shared<SceneObject>();
 		fishSceneObject->AddMeshObject(fishObjects[i]);
-		fishSceneObject->SetPosition(glm::vec3(0.0f, 8.0f, -40.0f));
+		fishSceneObject->SetPosition(glm::vec3(0.0f, 8.0f, -20.0f));
 		// cubeSceneObject->Rotate(glm::vec3(1.f, 0.f, 0.f), PI / 2.f);
 
 		fishSceneObject->CreateAccelerationData(AccelerationTypes::BVH);
