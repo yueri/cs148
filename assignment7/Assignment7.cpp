@@ -33,8 +33,8 @@ std::shared_ptr<Scene> Assignment7::CreateScene() const
     for (size_t i = 0; i < tableObjects.size(); ++i) {
         std::shared_ptr<Material> materialCopy = cubeMaterial->Clone();
         materialCopy->LoadMaterialFromAssimp(loadedMaterials[i]);
-		materialCopy->SetTexture("diffuseTexture", TextureLoader::LoadTexture("Table/pCube6Shape_color.png"));
-		materialCopy->SetTexture("specularTexture", TextureLoader::LoadTexture("Table/pCube6Shape_color.png"));
+		materialCopy->SetTexture("diffuseTexture", TextureLoader::LoadTexture("Table/Table.jpg"));
+		materialCopy->SetTexture("specularTexture", TextureLoader::LoadTexture("Table/Table.jpg"));
 		tableObjects[i]->SetMaterial(materialCopy);
 
         std::shared_ptr<SceneObject> tableSceneObject = std::make_shared<SceneObject>();
