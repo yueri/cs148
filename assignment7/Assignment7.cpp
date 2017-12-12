@@ -5,8 +5,8 @@ std::shared_ptr<Camera> Assignment7::CreateCamera() const
 {
     const glm::vec2 resolution = GetImageOutputResolution();
     std::shared_ptr<Camera> camera = std::make_shared<PerspectiveCamera>(1280.0f / 720.0f, 60.0f);
-    // camera->SetPosition(glm::vec3(0.f, -4.1469f, 0.73693f));
-    // camera->Rotate(glm::vec3(1.f, 0.f, 0.f), PI / 2.f);
+    camera->SetPosition(glm::vec3(15.f, 8.0f, 12.f));
+    camera->Rotate(glm::vec3(0.f, -1.0f, 0.f), -PI / 4.0f);
     return camera;
 }
 
@@ -25,21 +25,21 @@ std::shared_ptr<Scene> Assignment7::CreateScene() const
     std::shared_ptr<BlinnPhongMaterial> cubeMaterial = std::make_shared<BlinnPhongMaterial>();
     cubeMaterial->SetDiffuse(glm::vec3(1.f, 1.f, 1.f));
     cubeMaterial->SetSpecular(glm::vec3(0.6f, 0.6f, 0.6f), 40.f);
-    cubeMaterial->SetReflectivity(0.3f);
+    cubeMaterial->SetReflectivity(0.f);
 
     // Objects
-    std::vector<std::shared_ptr<aiMaterial>> loadedMaterials;
-	std::vector<std::shared_ptr<MeshObject>> tableObjects = MeshLoader::LoadMesh("Table/Table.obj", &loadedMaterials);
+    std::vector<std::shared_ptr<aiMaterial>> loadedMaterials1;
+	std::vector<std::shared_ptr<MeshObject>> tableObjects = MeshLoader::LoadMesh("Table/Table.obj", &loadedMaterials1);
     for (size_t i = 0; i < tableObjects.size(); ++i) {
         std::shared_ptr<Material> materialCopy = cubeMaterial->Clone();
-        materialCopy->LoadMaterialFromAssimp(loadedMaterials[i]);
+        materialCopy->LoadMaterialFromAssimp(loadedMaterials1[i]);
 		materialCopy->SetTexture("diffuseTexture", TextureLoader::LoadTexture("Table/Table.jpg"));
 		materialCopy->SetTexture("specularTexture", TextureLoader::LoadTexture("Table/Table.jpg"));
 		tableObjects[i]->SetMaterial(materialCopy);
 
         std::shared_ptr<SceneObject> tableSceneObject = std::make_shared<SceneObject>();
 		tableSceneObject->AddMeshObject(tableObjects[i]);
-		tableSceneObject->SetPosition(glm::vec3(0.0f, -8.0f, -20.0f));
+		tableSceneObject->SetPosition(glm::vec3(0.0f, 0.f, 0.f));
         // cubeSceneObject->Rotate(glm::vec3(1.f, 0.f, 0.f), PI / 2.f);
 
 		tableSceneObject->CreateAccelerationData(AccelerationTypes::BVH);
@@ -58,58 +58,130 @@ std::shared_ptr<Scene> Assignment7::CreateScene() const
     }
 
 	std::vector<std::shared_ptr<aiMaterial>> loadedMaterials2;
-	std::vector<std::shared_ptr<MeshObject>> fishObjects = MeshLoader::LoadMesh("Room/Room.obj", &loadedMaterials2);
-	for (size_t i = 0; i < fishObjects.size(); ++i) {
+	std::vector<std::shared_ptr<MeshObject>> roomObjects = MeshLoader::LoadMesh("Room/Room.obj", &loadedMaterials2);
+	for (size_t i = 0; i < roomObjects.size(); ++i) {
 		std::shared_ptr<Material> materialCopy = cubeMaterial->Clone();
 		materialCopy->LoadMaterialFromAssimp(loadedMaterials2[i]);
 		materialCopy->SetTexture("diffuseTexture", TextureLoader::LoadTexture("Room/wallpaper.jpg"));
 		materialCopy->SetTexture("specularTexture", TextureLoader::LoadTexture("Room/wallpaper.jpg"));
-		fishObjects[i]->SetMaterial(materialCopy);
+		roomObjects[i]->SetMaterial(materialCopy);
 
-		std::shared_ptr<SceneObject> fishSceneObject = std::make_shared<SceneObject>();
-		fishSceneObject->AddMeshObject(fishObjects[i]);
-		fishSceneObject->SetPosition(glm::vec3(0.0f, 8.0f, -20.0f));
+		std::shared_ptr<SceneObject> roomSceneObject = std::make_shared<SceneObject>();
+		roomSceneObject->AddMeshObject(roomObjects[i]);
+		roomSceneObject->SetPosition(glm::vec3(0.0f, 0.f, 0.f));
 		// cubeSceneObject->Rotate(glm::vec3(1.f, 0.f, 0.f), PI / 2.f);
 
-		fishSceneObject->CreateAccelerationData(AccelerationTypes::BVH);
-		fishSceneObject->ConfigureAccelerationStructure([](AccelerationStructure* genericAccelerator) {
+		roomSceneObject->CreateAccelerationData(AccelerationTypes::BVH);
+		roomSceneObject->ConfigureAccelerationStructure([](AccelerationStructure* genericAccelerator) {
 			BVHAcceleration* accelerator = dynamic_cast<BVHAcceleration*>(genericAccelerator);
 			accelerator->SetMaximumChildren(2);
 			accelerator->SetNodesOnLeaves(2);
 		});
 
-		fishSceneObject->ConfigureChildMeshAccelerationStructure([](AccelerationStructure* genericAccelerator) {
+		roomSceneObject->ConfigureChildMeshAccelerationStructure([](AccelerationStructure* genericAccelerator) {
 			BVHAcceleration* accelerator = dynamic_cast<BVHAcceleration*>(genericAccelerator);
 			accelerator->SetMaximumChildren(2);
 			accelerator->SetNodesOnLeaves(2);
 		});
-		newScene->AddSceneObject(fishSceneObject);
+		newScene->AddSceneObject(roomSceneObject);
+	}
+
+	std::vector<std::shared_ptr<aiMaterial>> loadedMaterials3;
+	std::vector<std::shared_ptr<MeshObject>> plantObjects = MeshLoader::LoadMesh("Plant/plant.obj", &loadedMaterials3);
+	for (size_t i = 0; i < plantObjects.size(); ++i) {
+		std::shared_ptr<Material> materialCopy = cubeMaterial->Clone();
+		materialCopy->LoadMaterialFromAssimp(loadedMaterials3[i]);
+		plantObjects[i]->SetMaterial(materialCopy);
+
+		std::shared_ptr<SceneObject> plantSceneObject = std::make_shared<SceneObject>();
+		plantSceneObject->AddMeshObject(plantObjects[i]);
+		plantSceneObject->SetPosition(glm::vec3(0.0f, 0.f, 0.f));
+		// cubeSceneObject->Rotate(glm::vec3(1.f, 0.f, 0.f), PI / 2.f);
+
+		plantSceneObject->CreateAccelerationData(AccelerationTypes::BVH);
+		plantSceneObject->ConfigureAccelerationStructure([](AccelerationStructure* genericAccelerator) {
+			BVHAcceleration* accelerator = dynamic_cast<BVHAcceleration*>(genericAccelerator);
+			accelerator->SetMaximumChildren(2);
+			accelerator->SetNodesOnLeaves(2);
+		});
+
+		plantSceneObject->ConfigureChildMeshAccelerationStructure([](AccelerationStructure* genericAccelerator) {
+			BVHAcceleration* accelerator = dynamic_cast<BVHAcceleration*>(genericAccelerator);
+			accelerator->SetMaximumChildren(2);
+			accelerator->SetNodesOnLeaves(2);
+		});
+		newScene->AddSceneObject(plantSceneObject);
+	}
+
+	std::vector<std::shared_ptr<aiMaterial>> loadedMaterials4;
+	std::vector<std::shared_ptr<MeshObject>> notebookObjects = MeshLoader::LoadMesh("notebooks/notebooks.obj", &loadedMaterials4);
+	for (size_t i = 0; i < notebookObjects.size(); ++i) {
+		std::shared_ptr<Material> materialCopy = cubeMaterial->Clone();
+		materialCopy->LoadMaterialFromAssimp(loadedMaterials4[i]);
+		notebookObjects[i]->SetMaterial(materialCopy);
+
+		std::shared_ptr<SceneObject> notebookSceneObject = std::make_shared<SceneObject>();
+		notebookSceneObject->AddMeshObject(notebookObjects[i]);
+		notebookSceneObject->SetPosition(glm::vec3(0.0f, 0.f, 0.f));
+		// cubeSceneObject->Rotate(glm::vec3(1.f, 0.f, 0.f), PI / 2.f);
+
+		notebookSceneObject->CreateAccelerationData(AccelerationTypes::BVH);
+		notebookSceneObject->ConfigureAccelerationStructure([](AccelerationStructure* genericAccelerator) {
+			BVHAcceleration* accelerator = dynamic_cast<BVHAcceleration*>(genericAccelerator);
+			accelerator->SetMaximumChildren(2);
+			accelerator->SetNodesOnLeaves(2);
+		});
+
+		notebookSceneObject->ConfigureChildMeshAccelerationStructure([](AccelerationStructure* genericAccelerator) {
+			BVHAcceleration* accelerator = dynamic_cast<BVHAcceleration*>(genericAccelerator);
+			accelerator->SetMaximumChildren(2);
+			accelerator->SetNodesOnLeaves(2);
+		});
+		newScene->AddSceneObject(notebookSceneObject);
+	}
+
+	std::vector<std::shared_ptr<aiMaterial>> loadedMaterials5;
+	std::vector<std::shared_ptr<MeshObject>> lampObjects = MeshLoader::LoadMesh("lamp/eb_lamp_01.obj", &loadedMaterials5);
+	for (size_t i = 0; i < lampObjects.size(); ++i) {
+		std::shared_ptr<Material> materialCopy = cubeMaterial->Clone();
+		materialCopy->LoadMaterialFromAssimp(loadedMaterials5[i]);
+		materialCopy->SetTexture("diffuseTexture", TextureLoader::LoadTexture("lamp/eb_lamp_01_c.tga"));
+		materialCopy->SetTexture("specularTexture", TextureLoader::LoadTexture("lamp/eb_lamp_01_c.tga"));
+		lampObjects[i]->SetMaterial(materialCopy);
+
+		std::shared_ptr<SceneObject> lampSceneObject = std::make_shared<SceneObject>();
+		lampSceneObject->AddMeshObject(lampObjects[i]);
+		lampSceneObject->SetPosition(glm::vec3(0.0f, 0.f, 0.f));
+		// cubeSceneObject->Rotate(glm::vec3(1.f, 0.f, 0.f), PI / 2.f);
+
+		lampSceneObject->CreateAccelerationData(AccelerationTypes::BVH);
+		lampSceneObject->ConfigureAccelerationStructure([](AccelerationStructure* genericAccelerator) {
+			BVHAcceleration* accelerator = dynamic_cast<BVHAcceleration*>(genericAccelerator);
+			accelerator->SetMaximumChildren(2);
+			accelerator->SetNodesOnLeaves(2);
+		});
+
+		lampSceneObject->ConfigureChildMeshAccelerationStructure([](AccelerationStructure* genericAccelerator) {
+			BVHAcceleration* accelerator = dynamic_cast<BVHAcceleration*>(genericAccelerator);
+			accelerator->SetMaximumChildren(2);
+			accelerator->SetNodesOnLeaves(2);
+		});
+		newScene->AddSceneObject(lampSceneObject);
 	}
 
     // Lights
     std::shared_ptr<Light> pointLight = std::make_shared<PointLight>();
-    pointLight->SetPosition(glm::vec3(0.0f, 0.0f, 2.0f));
-    pointLight->SetLightColor(glm::vec3(1.f, 1.f, 1.f));
+    pointLight->SetPosition(glm::vec3(30.0f, 30.0f, 30.0f));
+    pointLight->SetLightColor(glm::vec3(0.5f, 0.5f, 0.5f));
 
-	std::shared_ptr<Light> pointLight2 = std::make_shared<PointLight>();
-	pointLight2->SetPosition(glm::vec3(0.0f, 0.0f, -20.0f));
-	pointLight2->SetLightColor(glm::vec3(1.f, 1.f, 1.f));
+	// std::shared_ptr<Light> directionalLight = std::make_shared<DirectionalLight>();
+	// directionalLight->SetLightColor(glm::vec3(0.5f, 0.5f, 0.5f));
+	// directionalLight->Rotate(glm::vec3(0.f, -1.0f, 0.f), -PI / 4.0f);
 
-	std::shared_ptr<Light> pointLight3 = std::make_shared<PointLight>();
-	pointLight3->SetPosition(glm::vec3(10.0f, 0.0f, -30.0f));
-	pointLight3->SetLightColor(glm::vec3(1.f, 1.f, 1.f));
+	std::shared_ptr<Light> lampLight = std::make_shared<PointLight>();
+	lampLight->SetPosition(glm::vec3(7.0f, 12.0f, -2.0f));
+	lampLight->SetLightColor(glm::vec3(0.8f, 0.8f, 0.8f));
 
-	std::shared_ptr<Light> pointLight4 = std::make_shared<PointLight>();
-	pointLight4->SetPosition(glm::vec3(-10.0f, 0.0f, -30.0f));
-	pointLight4->SetLightColor(glm::vec3(1.f, 1.f, 1.f));
-
-	std::shared_ptr<Light> pointLight5 = std::make_shared<PointLight>();
-	pointLight5->SetPosition(glm::vec3(0.0f, -10.0f, -30.0f));
-	pointLight5->SetLightColor(glm::vec3(1.f, 1.f, 1.f));
-
-	std::shared_ptr<Light> pointLight6 = std::make_shared<PointLight>();
-	pointLight6->SetPosition(glm::vec3(0.0f, 10.0f, -30.0f));
-	pointLight6->SetLightColor(glm::vec3(1.f, 1.f, 1.f));
 
 #if ACCELERATION_TYPE == 0
     newScene->GenerateAccelerationData(AccelerationTypes::NONE);
@@ -122,7 +194,8 @@ std::shared_ptr<Scene> Assignment7::CreateScene() const
     accelerator->SetSuggestedGridSize(glm::ivec3(10, 10, 10));
 #endif    
     newScene->AddLight(pointLight);
-	newScene->AddLight(pointLight2);
+	// newScene->AddLight(directionalLight);
+	newScene->AddLight(lampLight);
 
     return newScene;
 
