@@ -171,6 +171,62 @@ std::shared_ptr<Scene> Assignment7::CreateScene() const
 		newScene->AddSceneObject(lampSceneObject);
 	}
 
+    std::vector<std::shared_ptr<aiMaterial>> loadedMaterials7;
+    std::vector<std::shared_ptr<MeshObject>> bookObjects = MeshLoader::LoadMesh("books/books.obj", &loadedMaterials7);
+    for (size_t i = 0; i < bookObjects.size(); ++i) {
+        std::shared_ptr<Material> materialCopy = cubeMaterial->Clone();
+        materialCopy->LoadMaterialFromAssimp(loadedMaterials7[i]);
+        materialCopy->SetTexture("diffuseTexture", TextureLoader::LoadTexture("books/textures/book_albedo.tga"));
+        materialCopy->SetTexture("specularTexture", TextureLoader::LoadTexture("books/textures/book_albedo.tga"));
+        bookObjects[i]->SetMaterial(materialCopy);
+
+        std::shared_ptr<SceneObject> bookSceneObject = std::make_shared<SceneObject>();
+        bookSceneObject->AddMeshObject(bookObjects[i]);
+        bookSceneObject->SetPosition(glm::vec3(0.0f, 0.f, 0.f));
+        // cubeSceneObject->Rotate(glm::vec3(1.f, 0.f, 0.f), PI / 2.f);
+
+        bookSceneObject->CreateAccelerationData(AccelerationTypes::BVH);
+        bookSceneObject->ConfigureAccelerationStructure([](AccelerationStructure* genericAccelerator) {
+            BVHAcceleration* accelerator = dynamic_cast<BVHAcceleration*>(genericAccelerator);
+            accelerator->SetMaximumChildren(2);
+            accelerator->SetNodesOnLeaves(2);
+        });
+
+        bookSceneObject->ConfigureChildMeshAccelerationStructure([](AccelerationStructure* genericAccelerator) {
+            BVHAcceleration* accelerator = dynamic_cast<BVHAcceleration*>(genericAccelerator);
+            accelerator->SetMaximumChildren(2);
+            accelerator->SetNodesOnLeaves(2);
+        });
+        newScene->AddSceneObject(bookSceneObject);
+    }
+
+    std::vector<std::shared_ptr<aiMaterial>> loadedMaterials8;
+    std::vector<std::shared_ptr<MeshObject>> mugObjects = MeshLoader::LoadMesh("mug/mug.obj", &loadedMaterials8);
+    for (size_t i = 0; i < mugObjects.size(); ++i) {
+        std::shared_ptr<Material> materialCopy = cubeMaterial->Clone();
+        materialCopy->LoadMaterialFromAssimp(loadedMaterials8[i]);
+        mugObjects[i]->SetMaterial(materialCopy);
+
+        std::shared_ptr<SceneObject> mugSceneObject = std::make_shared<SceneObject>();
+        mugSceneObject->AddMeshObject(mugObjects[i]);
+        mugSceneObject->SetPosition(glm::vec3(0.0f, 0.f, 0.f));
+        // cubeSceneObject->Rotate(glm::vec3(1.f, 0.f, 0.f), PI / 2.f);
+
+        mugSceneObject->CreateAccelerationData(AccelerationTypes::BVH);
+        mugSceneObject->ConfigureAccelerationStructure([](AccelerationStructure* genericAccelerator) {
+            BVHAcceleration* accelerator = dynamic_cast<BVHAcceleration*>(genericAccelerator);
+            accelerator->SetMaximumChildren(2);
+            accelerator->SetNodesOnLeaves(2);
+        });
+
+        mugSceneObject->ConfigureChildMeshAccelerationStructure([](AccelerationStructure* genericAccelerator) {
+            BVHAcceleration* accelerator = dynamic_cast<BVHAcceleration*>(genericAccelerator);
+            accelerator->SetMaximumChildren(2);
+            accelerator->SetNodesOnLeaves(2);
+        });
+        newScene->AddSceneObject(mugSceneObject);
+    }
+
     // Lights
     std::shared_ptr<Light> pointLight = std::make_shared<PointLight>();
     pointLight->SetPosition(glm::vec3(30.0f, 30.0f, 30.0f));
@@ -194,7 +250,7 @@ std::shared_ptr<Scene> Assignment7::CreateScene() const
     assert(accelerator);
     // Assignment 7 Part 2 TODO: Change the glm::ivec3(10, 10, 10) here.
     accelerator->SetSuggestedGridSize(glm::ivec3(10, 10, 10));
-#endif    
+#endif
     newScene->AddLight(pointLight);
 	// newScene->AddLight(directionalLight);
 	newScene->AddLight(lampLight);
