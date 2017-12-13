@@ -169,6 +169,35 @@ std::shared_ptr<Scene> Assignment7::CreateScene() const
 		newScene->AddSceneObject(lampSceneObject);
 	}
 
+    std::vector<std::shared_ptr<aiMaterial>> loadedMaterials6;
+    std::vector<std::shared_ptr<MeshObject>> frameObjects = MeshLoader::LoadMesh("frame/merry go round.obj", &loadedMaterials6);
+    for (size_t i = 0; i < frameObjects.size(); ++i) {
+        std::shared_ptr<Material> materialCopy = cubeMaterial->Clone();
+        materialCopy->LoadMaterialFromAssimp(loadedMaterials6[i]);
+        materialCopy->SetTexture("diffuseTexture", TextureLoader::LoadTexture("frame/textures/poster.jpeg"));
+        materialCopy->SetTexture("specularTexture", TextureLoader::LoadTexture("frame/textures/poster.jpeg"));
+        frameObjects[i]->SetMaterial(materialCopy);
+
+        std::shared_ptr<SceneObject> plantSceneObject = std::make_shared<SceneObject>();
+        plantSceneObject->AddMeshObject(frameObjects[i]);
+        plantSceneObject->SetPosition(glm::vec3(0.0f, 0.f, 0.f));
+        // cubeSceneObject->Rotate(glm::vec3(1.f, 0.f, 0.f), PI / 2.f);
+
+        plantSceneObject->CreateAccelerationData(AccelerationTypes::BVH);
+        plantSceneObject->ConfigureAccelerationStructure([](AccelerationStructure* genericAccelerator) {
+            BVHAcceleration* accelerator = dynamic_cast<BVHAcceleration*>(genericAccelerator);
+            accelerator->SetMaximumChildren(2);
+            accelerator->SetNodesOnLeaves(2);
+        });
+
+        plantSceneObject->ConfigureChildMeshAccelerationStructure([](AccelerationStructure* genericAccelerator) {
+            BVHAcceleration* accelerator = dynamic_cast<BVHAcceleration*>(genericAccelerator);
+            accelerator->SetMaximumChildren(2);
+            accelerator->SetNodesOnLeaves(2);
+        });
+        newScene->AddSceneObject(plantSceneObject);
+    }
+
     // Lights
     std::shared_ptr<Light> pointLight = std::make_shared<PointLight>();
     pointLight->SetPosition(glm::vec3(30.0f, 30.0f, 30.0f));
@@ -192,7 +221,7 @@ std::shared_ptr<Scene> Assignment7::CreateScene() const
     assert(accelerator);
     // Assignment 7 Part 2 TODO: Change the glm::ivec3(10, 10, 10) here.
     accelerator->SetSuggestedGridSize(glm::ivec3(10, 10, 10));
-#endif    
+#endif
     newScene->AddLight(pointLight);
 	// newScene->AddLight(directionalLight);
 	newScene->AddLight(lampLight);
