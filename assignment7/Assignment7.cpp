@@ -205,6 +205,8 @@ std::shared_ptr<Scene> Assignment7::CreateScene() const
     for (size_t i = 0; i < mugObjects.size(); ++i) {
         std::shared_ptr<Material> materialCopy = cubeMaterial->Clone();
         materialCopy->LoadMaterialFromAssimp(loadedMaterials8[i]);
+		materialCopy->SetTexture("diffuseTexture", TextureLoader::LoadTexture("mug/Stanford_logo.png"));
+		materialCopy->SetTexture("specularTexture", TextureLoader::LoadTexture("mug/Stanford_logo.png"));
         mugObjects[i]->SetMaterial(materialCopy);
 
         std::shared_ptr<SceneObject> mugSceneObject = std::make_shared<SceneObject>();
@@ -229,8 +231,8 @@ std::shared_ptr<Scene> Assignment7::CreateScene() const
 
     // Lights
     std::shared_ptr<Light> pointLight = std::make_shared<PointLight>();
-    pointLight->SetPosition(glm::vec3(30.0f, 30.0f, 30.0f));
-    pointLight->SetLightColor(glm::vec3(0.8f, 0.8f, 0.8f));
+    pointLight->SetPosition(glm::vec3(20.0f, 20.0f, 20.0f));
+    pointLight->SetLightColor(glm::vec3(0.5f, 0.5f, 0.5f));
 
 	// std::shared_ptr<Light> directionalLight = std::make_shared<DirectionalLight>();
 	// directionalLight->SetLightColor(glm::vec3(0.5f, 0.5f, 0.5f));
