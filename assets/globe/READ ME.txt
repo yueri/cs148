@@ -1,0 +1,4 @@
+To add the ambient occlusion map in game engine,
+simply add the texture file in the appropriate node
+in the 2 globe base materials, but do not add it to
+the material of the spherical globe itself, as the uv texture geometry overlaps
